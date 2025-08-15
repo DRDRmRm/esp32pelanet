@@ -1,35 +1,38 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>ESP32 Heater Control</title>
+  <meta charset="UTF-8">
+  <title>ESP32 Control</title>
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
 </head>
 <body>
-  <h1>Heater Control</h1>
-  <button onclick="sendCommand('ON')">Turn ON</button>
-  <button onclick="sendCommand('OFF')">Turn OFF</button>
-  <p>Status: <span id="status">Unknown</span></p>
+  <h1>ESP32 Relay Control</h1>
+  <button onclick="turnOn()">Turn ON</button>
+  <button onclick="turnOff()">Turn OFF</button>
 
-  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
   <script>
-    const broker = "wss://test.mosquitto.org:8081";
-    const commandTopic = "drm-pelanet/aquecimento/command";
-    const statusTopic  = "drm-pelanet/aquecimento/status";
+    // MQTT over WebSocket
+    const broker = 'ws://broker.hivemq.com:8000/mqtt';
+    const topic = 'esp32/aquecimento';
 
     const client = mqtt.connect(broker);
 
-    client.on('connect', () => {
-      console.log("Connected to MQTT broker");
-      client.subscribe(statusTopic);
+    client.on('connect', function () {
+      console.log('Connected to MQTT broker');
     });
 
-    client.on('message', (topic, message) => {
-      if (topic === statusTopic) {
-        document.getElementById("status").innerText = message.toString();
-      }
+    client.on('error', function(err) {
+      console.log('Connection error: ', err);
     });
 
-    function sendCommand(cmd) {
-      client.publish(commandTopic, cmd);
+    function turnOn() {
+      client.publish(topic, 'ON');
+      console.log('Sent ON');
+    }
+
+    function turnOff() {
+      client.publish(topic, 'OFF');
+      console.log('Sent OFF');
     }
   </script>
 </body>
